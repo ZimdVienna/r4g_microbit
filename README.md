@@ -8,6 +8,10 @@ Follow the installation instructions from [IOT Programmer](https://www.iot-progr
 Theese links are also very helpfull for learning about the microbit and how to program it in C/C++.
 ### clone the repository
 Next, clone this repository, open yotta and <b>navigate to the project folder</b>.
+Set the compiler target with:
+
+*<b>yotta target bbc-microbit-classic-gcc</b>*
+
 ### build the project
 To build the project enter
 
