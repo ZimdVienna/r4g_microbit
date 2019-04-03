@@ -1,0 +1,26 @@
+{
+  "name": "r4g-microbit",
+  "version": "0.1.0",
+  "description": "robo4girls is an educational micro:bit robotic platform . Can be controlled via the R4G App and bluetooth",
+  "keywords": [
+    "R4G",
+    "Robo4Girls",
+    "micro:bit"
+  ],
+  "author": "Daniela Riedl",
+  "repository": {
+    "url": "https://github.com/ZimdVienna/r4g_microbit_yotta_project.git",
+    "type": "git"
+  },
+  "homepage": "https://zimd.at",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/MIT",
+      "type": "MIT"
+    }
+  ],
+  "dependencies": {
+    "microbit": "^2.1.1"
+  },
+  "bin": "./source"
+}
