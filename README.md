@@ -13,5 +13,5 @@ To build the project enter
 
 *<b>yotta build</b>*
 
-inside your yotta workspace. After yotta finished the build successfully you should have a <b>build</b> directory in your project folder. The .hex file you want to download to your micro:bit is the <b>r4g-microbit-combined.hex</b> file in the <b>source</b> folder inside the <b>build/bbc-microbit-classic-gcc/ directory</b>.
+inside your yotta workspace. After yotta finished the build successfully you should have a <b>build</b> directory in your project folder. The .hex file you want to download to your micro:bit is the <b>r4g-microbit-combined.hex</b> file inside the <b>source/build/bbc-microbit-classic-gcc/</b> directory.
 You can now change the main.cpp or header files in the <b>source</b> directory to your liking with an editor of your choice and rebuild it with *<b>yotta build</b>*.
