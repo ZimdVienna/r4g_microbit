@@ -1,4 +1,4 @@
-# r4g_microbit_yotta_project
+# R4G microbit
 This is the Mbed project for the R4G Micro:bit program. It is programmed in C/C++ and utilizes the [lancester-university microbit runtime](https://lancaster-university.github.io/microbit-docs/).
 
 
