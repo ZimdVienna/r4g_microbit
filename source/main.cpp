@@ -35,8 +35,8 @@ MicroBitUARTService *uart;      // serial communication via Bluetooth Low Energy
 
 // used microbit analog pins
 MicroBitPin MelodyPin(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG);
-MicroBitPin SensorPinL(MICROBIT_ID_IO_P10, MICROBIT_PIN_P10, PIN_CAPABILITY_ALL);
-MicroBitPin SensorPinR(MICROBIT_ID_IO_P4, MICROBIT_PIN_P4, PIN_CAPABILITY_ALL);
+//MicroBitPin SensorPinL(MICROBIT_ID_IO_P10, MICROBIT_PIN_P10, PIN_CAPABILITY_ALL);
+//MicroBitPin SensorPinR(MICROBIT_ID_IO_P4, MICROBIT_PIN_P4, PIN_CAPABILITY_ALL);
 
 // use of constants gets stored in flash memory (saves RAM)
 // Melodies as integer arrays: 0 ends the song!
@@ -221,6 +221,7 @@ void onDisconnected(MicroBitEvent) {
     uBit.display.scroll("D");
 }
 
+/*
 void onTouch(MicroBitEvent) {
     //<! shows angry face when microbit bumps into something
     if(SensorPinR.isTouched() || SensorPinL.isTouched()){
@@ -233,7 +234,7 @@ void onTouch(MicroBitEvent) {
         uBit.display.clear();
     }
 }
-
+*/
 void onButtonB(MicroBitEvent) {
     //<! stops motors when ButtonB is clicked long
     uBit.display.scroll("stop");
@@ -251,14 +252,14 @@ int main()
     uBit.serial.send("A\r\n");
     
     //sensor pins
-    SensorPinR.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
-    SensorPinL.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
+    //SensorPinR.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
+    //SensorPinL.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
     MelodyPin.setAnalogValue(0);
 
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_CONNECTED, onConnected);
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_DISCONNECTED, onDisconnected);
-    uBit.messageBus.listen(MICROBIT_ID_IO_P19, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
-    uBit.messageBus.listen(MICROBIT_ID_IO_P20, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
+    //uBit.messageBus.listen(MICROBIT_ID_IO_P19, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
+    //uBit.messageBus.listen(MICROBIT_ID_IO_P20, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_LONG_CLICK, onButtonB);
     
     uart = new MicroBitUARTService(*uBit.ble,32,32);
