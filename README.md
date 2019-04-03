@@ -3,8 +3,7 @@ This is the Mbed project for the R4G Micro:bit program. It is programmed in C/C+
 
 
 ### To change and build the micro:bit .hex file follow theese steps:
-You can either install [yotta](http://docs.yottabuild.org/#introduction) or register at [mbed](https://www.mbed.com/)
-## Install yotta
+## Install [yotta](http://docs.yottabuild.org/#introduction)
 Follow the installation instructions on the yotta website or from [lancaster-university](https://lancaster-university.github.io/microbit-docs/offline-toolchains/) or from [IOT Programmer](https://www.iot-programmer.com/index.php/books/27-micro-bit-iot-in-c/chapters-micro-bit-iot-in-c/44-offline-c-c-development-with-the-micro-bit). 
 Theese links are also very helpfull for learning about the microbit and how to program it in C/C++.
 ### clone the repository
