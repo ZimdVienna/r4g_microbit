@@ -35,8 +35,9 @@ MicroBitUARTService *uart;      // serial communication via Bluetooth Low Energy
 
 // used microbit analog pins
 MicroBitPin MelodyPin(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG);
-//MicroBitPin SensorPinL(MICROBIT_ID_IO_P10, MICROBIT_PIN_P10, PIN_CAPABILITY_ALL);
-//MicroBitPin SensorPinR(MICROBIT_ID_IO_P4, MICROBIT_PIN_P4, PIN_CAPABILITY_ALL);
+
+MicroBitPin SensorPinL(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
+MicroBitPin SensorPinR(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
 
 // use of constants gets stored in flash memory (saves RAM)
 // Melodies as integer arrays: 0 ends the song!
@@ -61,7 +62,7 @@ const uint8_t smallHeart[] __attribute__ ((aligned (4)))= { 0xff, 0xff, 5, 0, 5,
 const uint8_t heart[] __attribute__ ((aligned (4)))     = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 1,1,1,1,1, 1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0 };
 const uint8_t happy[] __attribute__((aligned (4)))      = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 0,1,0,1,0, 0,0,0,0,0, 1,0,0,0,1, 0,1,1,1,0 };
 const uint8_t sad[] __attribute__((aligned (4)))        = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 0,1,0,1,0, 0,0,0,0,0, 0,1,1,1,0, 1,0,0,0,1 };
-const uint8_t angry[] __attribute__((aligned (4)))      = { 0xff, 0xff, 5, 0, 5, 0, 1,0,0,0,1, 0,1,0,1,0, 0,0,0,0,0, 1,1,1,1,1, 1,0,1,0,1 };
+const uint8_t angry[] __attribute__((aligned (4)))      = { 0xff, 0xff, 5, 0, 5, 0, 1,0,0,0,1, 0,1,0,1,0, 0,0,0,0,0, 1,1,1,1,1, 1,0,0,0,1 };
 const uint8_t asleep[] __attribute__((aligned(4)))      = { 0xff, 0xff, 5, 0, 5, 0, 0,0,0,0,0, 1,1,0,1,1, 0,0,0,0,0, 0,1,1,1,0, 0,0,0,0,0 };
 const uint8_t surprised[] __attribute__((aligned(4)))   = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 0,0,0,0,0, 0,0,1,0,0, 0,1,0,1,0, 0,0,1,0,0 };
 const uint8_t yes[] __attribute__((aligned(4)))         = { 0xff, 0xff, 5, 0, 5, 0, 0,0,0,0,0, 0,0,0,0,1, 0,0,0,1,0, 1,0,1,0,0, 0,1,0,0,0 };
@@ -74,6 +75,10 @@ const int storedPictures = 9;
 // uBit.display.print(MicroBitImage, int x, int y, int alpha , int delay);
 
 // Motor Control
+// if Waveshare Motorboard: pre configure pwm pins 8 and 16 as analog outputs
+MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
+MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
+
 uint32_t velocity_1 = 1023;  // initial velocity motor1 (motor velocity from (1*64 - 1) = 63 to (16*64 - 1) = 1023
 uint32_t velocity_2 = 1023;  // initial velocity motor2
 // constant variables for directions
@@ -108,7 +113,7 @@ unsigned char set_direction(ManagedString direction, unsigned char *bitmasks){
 void moveBot(ManagedString msg);
 
 /******************** Functions ***************************/
-    
+
 void playMelody(int songidx) {
     //<! plays melody out of songbook
     for(int i = 0; SONGS[songidx][i] != 0; i++){
@@ -124,7 +129,12 @@ void onConnected(MicroBitEvent) {
     //>! receives and handles commands, sends "OK" to app if successfull
     ManagedString msg = "R4G";
     ManagedString eom(":");
-    uBit.display.scroll("C");
+    // preconfigure Pins as output pins by writing to them
+    // MelodyPin.setAnalogValue(0);
+    // P8.setAnalogValue(0);
+    // P16.setAnalogValue(0);
+    // SensorPinL.getAnalogValue();
+    // SensorPinR.getAnalogValue();
     
     while(1) {
         //reads incoming messages until delimiter ":"
@@ -221,20 +231,21 @@ void onDisconnected(MicroBitEvent) {
     uBit.display.scroll("D");
 }
 
-/*
+
 void onTouch(MicroBitEvent) {
     //<! shows angry face when microbit bumps into something
+    uBit.display.scroll(SensorPinR.isTouched());
     if(SensorPinR.isTouched() || SensorPinL.isTouched()){
         MicroBitImage angry_face = ((ImageData*)angry);
-        //uBit.display.print(angry_face,5);
+        uBit.display.print(angry_face,5);
         //uBit.display.print(angry_face, 0, 0, 0 , 500);
-        uBit.display.print("y");
+        //uBit.display.print("y");
     }
     else{
         uBit.display.clear();
     }
 }
-*/
+
 void onButtonB(MicroBitEvent) {
     //<! stops motors when ButtonB is clicked long
     uBit.display.scroll("stop");
@@ -252,14 +263,13 @@ int main()
     uBit.serial.send("A\r\n");
     
     //sensor pins
-    //SensorPinR.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
-    //SensorPinL.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
-    MelodyPin.setAnalogValue(0);
+    SensorPinR.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
+    SensorPinL.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
 
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_CONNECTED, onConnected);
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_DISCONNECTED, onDisconnected);
-    //uBit.messageBus.listen(MICROBIT_ID_IO_P19, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
-    //uBit.messageBus.listen(MICROBIT_ID_IO_P20, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
+    uBit.messageBus.listen(MICROBIT_ID_IO_P1, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
+    uBit.messageBus.listen(MICROBIT_ID_IO_P2, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_LONG_CLICK, onButtonB);
     
     uart = new MicroBitUARTService(*uBit.ble,32,32);
@@ -277,7 +287,7 @@ int main()
 /***** Motor control: choose your board or write your own motor control *****/
 
 // ElecFreaks Motor:bit Board
-
+/*
 void moveBot(ManagedString msg) {
     // Motor 1 PWM = P1,    Motor1 direction = P8 (LOW = CC, HIGH = C)
     // Motor 2 PWM = P2,    Motor2 direction = P12(LOW = CC, HIGH = C)
@@ -294,7 +304,7 @@ void moveBot(ManagedString msg) {
     uBit.io.P1.setAnalogValue((m1_pwm & moveMask)* velocity_1);             //pwm motor1
     uBit.io.P2.setAnalogValue(((m2_pwm & moveMask)/m2_pwm) * velocity_2);   //pwm motor2
 }
-
+*/
 
 
 // Keyestudio Motor Driver Board v1.8
@@ -322,10 +332,6 @@ void moveBot(ManagedString msg) {
 
 
 //Waveshare Motor Driver for micro:bit
-/*
-// pre configure pwm pins 8 and 16 as analog outputs
-MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
-MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
  
 void moveBot(ManagedString msg) {
     // Motor A in1 = pin 13,    Motor A in2 = pin 12
@@ -335,9 +341,10 @@ void moveBot(ManagedString msg) {
     // bitmasks for motorPins
     unsigned char m1_pin1 = 1, m1_pin2 = 2, m1_pwm = 4, m2_pin1 = 8, m2_pin2 = 16, m2_pwm = 32;
     // bitmasks for directions:
-    unsigned char bitmasks[6] = {15,5,12,3,13,7};
+    unsigned char bitmasks[6] = {45,54,5,40,53,46};
     ManagedString direction(msg.charAt(1));
-    unsigned char moveMask = set_direction(direction,bitmasks);
+    unsigned char moveMask = 0;
+    moveMask = set_direction(direction,bitmasks);
     //set the pin values according to direction
     uBit.io.P13.setDigitalValue(m1_pin1 & moveMask);                //dir motor1
     uBit.io.P12.setDigitalValue((m1_pin2 & moveMask)/m1_pin2);
@@ -347,5 +354,5 @@ void moveBot(ManagedString msg) {
     P8.setAnalogValue(((m1_pwm & moveMask)/m1_pwm) * velocity_1);   //pwm motor1
     P16.setAnalogValue(((m2_pwm & moveMask)/m2_pwm) * velocity_2);  //pwm motor2
 }
-*/
+
 
