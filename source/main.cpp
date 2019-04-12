@@ -36,8 +36,8 @@ MicroBitUARTService *uart;      // serial communication via Bluetooth Low Energy
 // used microbit analog pins
 MicroBitPin MelodyPin(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG);
 
-MicroBitPin SensorPinL(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
-MicroBitPin SensorPinR(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
+//MicroBitPin SensorPinL(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
+//MicroBitPin SensorPinR(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
 
 // use of constants gets stored in flash memory (saves RAM)
 // Melodies as integer arrays: 0 ends the song!
@@ -129,12 +129,6 @@ void onConnected(MicroBitEvent) {
     //>! receives and handles commands, sends "OK" to app if successfull
     ManagedString msg = "R4G";
     ManagedString eom(":");
-    // preconfigure Pins as output pins by writing to them
-    // MelodyPin.setAnalogValue(0);
-    // P8.setAnalogValue(0);
-    // P16.setAnalogValue(0);
-    // SensorPinL.getAnalogValue();
-    // SensorPinR.getAnalogValue();
     
     while(1) {
         //reads incoming messages until delimiter ":"
@@ -231,15 +225,15 @@ void onDisconnected(MicroBitEvent) {
     uBit.display.scroll("D");
 }
 
-
+MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ALL);
 void onTouch(MicroBitEvent) {
-    //<! shows angry face when microbit bumps into something
-    uBit.display.scroll(SensorPinR.isTouched());
-    if(SensorPinR.isTouched() || SensorPinL.isTouched()){
-        MicroBitImage angry_face = ((ImageData*)angry);
-        uBit.display.print(angry_face,5);
-        //uBit.display.print(angry_face, 0, 0, 0 , 500);
-        //uBit.display.print("y");
+    //int sensorLeft = uBit.io.P1.getAnalogValue();
+    //int sensorRight = uBit.io.P2.getAnalogValue();
+    if(P1.getAnalogValue() == 0){
+        // shows angry face when bump into something
+        uBit.display.print("!");
+        //MicroBitImage s = ((ImageData*)angry);
+        //uBit.display.print(s,5);
     }
     else{
         uBit.display.clear();
@@ -257,19 +251,16 @@ int main()
 {
     // Initialise the micro:bit runtime.
     uBit.init();
+    uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_180);
     
     //serial communication via uart
     uBit.serial.baud(9600);
     uBit.serial.send("A\r\n");
-    
-    //sensor pins
-    SensorPinR.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
-    SensorPinL.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
+    P1.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
+    uBit.messageBus.listen(MICROBIT_ID_IO_P1, MICROBIT_PIN_EVT_FALL, onTouch);
 
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_CONNECTED, onConnected);
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_DISCONNECTED, onDisconnected);
-    uBit.messageBus.listen(MICROBIT_ID_IO_P1, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
-    uBit.messageBus.listen(MICROBIT_ID_IO_P2, MICROBIT_PIN_EVENT_ON_TOUCH, onTouch);
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_LONG_CLICK, onButtonB);
     
     uart = new MicroBitUARTService(*uBit.ble,32,32);
