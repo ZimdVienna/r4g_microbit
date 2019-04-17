@@ -41,21 +41,27 @@ MicroBitPin MelodyPin(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG)
 
 // use of constants gets stored in flash memory (saves RAM)
 // Melodies as integer arrays: 0 ends the song!
-const int tusch[]       =   {NOTE_C4,NOTE_G3,NOTE_G3,NOTE_A3,NOTE_G3,NOTE_B3,NOTE_C4,0};
-const int song2[]       =   {NOTE_C5,NOTE_B4,NOTE_G4,NOTE_C5,NOTE_B4,NOTE_E4,NOTE_C5,NOTE_C4,NOTE_G4,NOTE_A4,NOTE_C5,0};
-const int starWars[]    =   {NOTE_G3,NOTE_G3,NOTE_G3,NOTE_C3,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_D3,NOTE_C4,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_D3,NOTE_C4,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_F3,NOTE_D3,0};
-const int superMario[]  =   {NOTE_E4,NOTE_E4,NOTE_E4,NOTE_C4,NOTE_E4,NOTE_G4,NOTE_G3,0};
+const int tusch[]       =   {NOTE_C4,0,NOTE_G3,NOTE_G3,NOTE_A3,NOTE_G3,0,NOTE_B3,NOTE_C4,-1};
+const int song2[]       =   {NOTE_C5,NOTE_B4,NOTE_G4,NOTE_C5,NOTE_B4,NOTE_E4,NOTE_C5,NOTE_C4,NOTE_G4,NOTE_A4,NOTE_C5,-1};
+const int starWars[]    =   {NOTE_G3,NOTE_G3,NOTE_G3,NOTE_C3,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_D3,NOTE_C4,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_D3,NOTE_C4,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_F3,NOTE_D3,-1};
+const int superMario[]  =   {NOTE_E4,NOTE_E4,0,NOTE_E4,0,NOTE_C4,NOTE_E4,0,NOTE_G4,0,NOTE_G3,-1};
+const int waltz[]       =   {NOTE_A3,NOTE_A3,NOTE_CS4,NOTE_E4,NOTE_E4,0,NOTE_E4,NOTE_E4,0,NOTE_CS4,NOTE_CS4,0,NOTE_A3,NOTE_A3,NOTE_CS4,NOTE_E4,NOTE_E4,0,NOTE_E4,NOTE_E4,0,NOTE_D4,NOTE_D4,-1};
+const int tango[]       =   {NOTE_G3,0,NOTE_A3,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_F3,NOTE_G3,0,NOTE_E3,0,NOTE_G3,0,NOTE_A3,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_G3,NOTE_F3,0,NOTE_D3,-1};
+const int disco[]       =   {};
 
 // Delays to hold the notes (eg. 1/8, 1/4, 1/16 notes)
-const int tusch_b[]     =   {250, 160, 160, 250,400,250,250,0};
-const int beat2[]       =   {160, 160, 160, 800, 800, 160, 160, 160, 160, 800, 800,0};
-const int starWars_b[]  =   {160, 160, 160,800,800,160,160,160,800,400,160,160,160,800,400,160,160,160,800,0};
-const int superMario_b[]=   {160, 160, 250, 160,160,400,250,0};
+const int tusch_b[]     =   {160,67,160,160,250,400,67,250,250,0};
+const int beat2[]       =   {160,160,160,800,800,160,160,160,160,800,800,0};
+const int starWars_b[]  =   {160,160,160,800,800,160,160,160,800,400,160,160,160,800,400,160,160,160,800,0};
+const int superMario_b[]=   {167,167,76,250,76,167,167,76,250,250,250,0};
+const int waltz_b[]     =   {250,250,250,250,400,80,320,400,80,320,400,80,250,250,250,250,320,80,320,400,80,320,400,0};
+const int tango_b[]     =   {250,76,250,176,176,180,176,250,76,400,1050,250,76,250,176,176,176,180,250,76,400,0};
+const int disco_b[]     =   {};
 
 // Songbook
-const int *SONGS[] = {tusch,song2,starWars,superMario};
-const int *BEATS[] = {tusch_b,beat2,starWars_b,superMario_b};
-const int storedSongs = 4;
+const int *SONGS[] = {tusch,song2,starWars,superMario,waltz,tango};
+const int *BEATS[] = {tusch_b,beat2,starWars_b,superMario_b,waltz_b,tango_b};
+const int storedSongs = 6;
 
 // Pictures: microbit images get normally stored in sram, to store them in flash:
 const uint8_t smallHeart[] __attribute__ ((aligned (4)))= { 0xff, 0xff, 5, 0, 5, 0, 0,0,0,0,0, 0,1,0,1,0, 0,1,1,1,0, 0,0,1,0,0, 0,0,0,0,0 };
@@ -116,7 +122,7 @@ void moveBot(ManagedString msg);
 
 void playMelody(int songidx) {
     //<! plays melody out of songbook
-    for(int i = 0; SONGS[songidx][i] != 0; i++){
+    for(int i = 0; SONGS[songidx][i] != -1; i++){
             MelodyPin.setAnalogValue(511);//set duty cycle
             MelodyPin.setAnalogPeriodUs((int)(1000000/SONGS[songidx][i]));
             uBit.sleep(BEATS[songidx][i]);
