@@ -28,42 +28,23 @@ DEALINGS IN THE SOFTWARE.
 
 #include "MicroBit.h"
 #include "MicroBitUARTService.h"
-#include "MusicalNotes.h"
+#include "MusicalNotes.h"       //musical notes and songbook
 
 MicroBit uBit;                  // instance of the microbit class
 MicroBitUARTService *uart;      // serial communication via Bluetooth Low Energy
 
-// used microbit analog pins
+// preconfigure microbit pins:
 MicroBitPin MelodyPin(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG);
+//MicroBitPin SensorPinL(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ALL);
+//MicroBitPin SensorPinR(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ALL);
 
-//MicroBitPin SensorPinL(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
-//MicroBitPin SensorPinR(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
+// uncomment if you use a Waveshare Motor Driver Board: pre configure pwm pins 8 and 16 as analog outputs:
+//MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
+//MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
 
-// use of constants gets stored in flash memory (saves RAM)
-// Melodies as integer arrays: 0 ends the song!
-const int tusch[]       =   {NOTE_C4,0,NOTE_G3,NOTE_G3,NOTE_A3,NOTE_G3,0,NOTE_B3,NOTE_C4,-1};
-const int song2[]       =   {NOTE_C5,NOTE_B4,NOTE_G4,NOTE_C5,NOTE_B4,NOTE_E4,NOTE_C5,NOTE_C4,NOTE_G4,NOTE_A4,NOTE_C5,-1};
-const int starWars[]    =   {NOTE_G3,NOTE_G3,NOTE_G3,NOTE_C3,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_D3,NOTE_C4,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_D3,NOTE_C4,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_F3,NOTE_D3,-1};
-const int superMario[]  =   {NOTE_E4,NOTE_E4,0,NOTE_E4,0,NOTE_C4,NOTE_E4,0,NOTE_G4,0,NOTE_G3,-1};
-const int waltz[]       =   {NOTE_A3,NOTE_A3,NOTE_CS4,NOTE_E4,NOTE_E4,0,NOTE_E4,NOTE_E4,0,NOTE_CS4,NOTE_CS4,0,NOTE_A3,NOTE_A3,NOTE_CS4,NOTE_E4,NOTE_E4,0,NOTE_E4,NOTE_E4,0,NOTE_D4,NOTE_D4,-1};
-const int tango[]       =   {NOTE_G3,0,NOTE_A3,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_F3,NOTE_G3,0,NOTE_E3,0,NOTE_G3,0,NOTE_A3,NOTE_G3,NOTE_F3,NOTE_E3,NOTE_G3,NOTE_F3,0,NOTE_D3,-1};
-const int disco[]       =   {};
+/*  Pictures  */
 
-// Delays to hold the notes (eg. 1/8, 1/4, 1/16 notes)
-const int tusch_b[]     =   {160,67,160,160,250,400,67,250,250,0};
-const int beat2[]       =   {160,160,160,800,800,160,160,160,160,800,800,0};
-const int starWars_b[]  =   {160,160,160,800,800,160,160,160,800,400,160,160,160,800,400,160,160,160,800,0};
-const int superMario_b[]=   {167,167,76,250,76,167,167,76,250,250,250,0};
-const int waltz_b[]     =   {250,250,250,250,400,80,320,400,80,320,400,80,250,250,250,250,320,80,320,400,80,320,400,0};
-const int tango_b[]     =   {250,76,250,176,176,180,176,250,76,400,1050,250,76,250,176,176,176,180,250,76,400,0};
-const int disco_b[]     =   {};
-
-// Songbook
-const int *SONGS[] = {tusch,song2,starWars,superMario,waltz,tango};
-const int *BEATS[] = {tusch_b,beat2,starWars_b,superMario_b,waltz_b,tango_b};
-const int storedSongs = 6;
-
-// Pictures: microbit images get normally stored in sram, to store them in flash:
+// Microbit images get normally stored in sram, to store them in flash:
 const uint8_t smallHeart[] __attribute__ ((aligned (4)))= { 0xff, 0xff, 5, 0, 5, 0, 0,0,0,0,0, 0,1,0,1,0, 0,1,1,1,0, 0,0,1,0,0, 0,0,0,0,0 };
 const uint8_t heart[] __attribute__ ((aligned (4)))     = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 1,1,1,1,1, 1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0 };
 const uint8_t happy[] __attribute__((aligned (4)))      = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 0,1,0,1,0, 0,0,0,0,0, 1,0,0,0,1, 0,1,1,1,0 };
@@ -80,13 +61,11 @@ const int storedPictures = 9;
 // MicroBitImage i((ImageData*)heart);
 // uBit.display.print(MicroBitImage, int x, int y, int alpha , int delay);
 
-// Motor Control
-// if Waveshare Motorboard: pre configure pwm pins 8 and 16 as analog outputs
-MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
-MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
+/*  Motor Control  */
 
 uint32_t velocity_1 = 1023;  // initial velocity motor1 (motor velocity from (1*64 - 1) = 63 to (16*64 - 1) = 1023
 uint32_t velocity_2 = 1023;  // initial velocity motor2
+
 // constant variables for directions
 const ManagedString forwards("v");      //name forwards to delineate from std::forward
 const ManagedString backwards("z");
@@ -115,11 +94,11 @@ unsigned char set_direction(ManagedString direction, unsigned char *bitmasks){
         moveMask = 0;   //stop
     return moveMask;
 }
+
 /* function to set pins of motor board, choose your board on the bottom of the file or write your own motor control */
 void moveBot(ManagedString msg);
 
-/******************** Functions ***************************/
-
+/* play Song from songbook in musicalNotes.h */
 void playMelody(int songidx) {
     //<! plays melody out of songbook
     for(int i = 0; SONGS[songidx][i] != -1; i++){
@@ -131,6 +110,35 @@ void playMelody(int songidx) {
     }
 }
 
+/* button B long click stops motors */
+void onButtonB(MicroBitEvent) {
+    //<! stops motors when ButtonB is clicked long
+    moveBot("s");
+    uBit.display.scroll("stop");
+}
+
+/*
+// touch sensors react when robot bumps into something
+void onTouch(MicroBitEvent) {
+    int sensorLeft = uBit.io.P1.getAnalogValue();
+    int sensorRight = uBit.io.P2.getAnalogValue();
+    if(sensorLeft == 0 || sensorRight == 0){
+    // shows angry face when bump into something
+        MicroBitImage s = ((ImageData*)angry);
+        uBit.display.print(s,5);
+    }
+    else{
+        uBit.display.clear();
+    }
+}
+*/
+
+/* when disconnected from bluetooth client */
+void onDisconnected(MicroBitEvent) {
+    uBit.display.scroll("D");
+}
+
+/* robot control when connected */
 void onConnected(MicroBitEvent) {
     //>! receives and handles commands, sends "OK" to app if successfull
     ManagedString msg = "R4G";
@@ -169,13 +177,12 @@ void onConnected(MicroBitEvent) {
             case 'G': {
                 char motor = msg.charAt(1);
                 uint32_t val = (uint32_t)((msg.charAt(2)-'0') * 10 + (msg.charAt(3)-'0'));
-                // check if number is valid
+                // check if input is valid
                 if(val < 1 || val > 16){
                     uBit.display.scroll(msg);
                     break;
                 }
-                // scale to velocity
-                int vel = int((val * 64)-1);
+                int vel = int((val * 64)-1);    // scale to velocity
                 switch(motor){
                     case '1': {
                         velocity_1 = vel;
@@ -222,34 +229,8 @@ void onConnected(MicroBitEvent) {
         // turn everything off
         moveBot("s");
         MelodyPin.setAnalogValue(0);
-        // send confirmation to app
-        uart->send("OK\n");
+        uart->send("OK\n");     // send confirmation to app
     }
-}
-
-void onDisconnected(MicroBitEvent) {
-    uBit.display.scroll("D");
-}
-
-MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ALL);
-void onTouch(MicroBitEvent) {
-    //int sensorLeft = uBit.io.P1.getAnalogValue();
-    //int sensorRight = uBit.io.P2.getAnalogValue();
-    if(P1.getAnalogValue() == 0){
-        // shows angry face when bump into something
-        uBit.display.print("!");
-        //MicroBitImage s = ((ImageData*)angry);
-        //uBit.display.print(s,5);
-    }
-    else{
-        uBit.display.clear();
-    }
-}
-
-void onButtonB(MicroBitEvent) {
-    //<! stops motors when ButtonB is clicked long
-    uBit.display.scroll("stop");
-    moveBot("s");
 }
 
 
@@ -257,13 +238,16 @@ int main()
 {
     // Initialise the micro:bit runtime.
     uBit.init();
-    uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_180);
+    //uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_180);
     
     //serial communication via uart
     uBit.serial.baud(9600);
     uBit.serial.send("A\r\n");
-    P1.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH);
-    uBit.messageBus.listen(MICROBIT_ID_IO_P1, MICROBIT_PIN_EVT_FALL, onTouch);
+
+    //sensorRight.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH));
+    //sensorLeft.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH));
+    //uBit.messageBus.listen(MICROBIT_ID_IO_P1, MICROBIT_PIN_EVT_FALL, onTouch);
+    //uBit.messageBus.listen(MICROBIT_ID_IO_P2, MICROBIT_PIN_EVT_FALL, onTouch)
 
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_CONNECTED, onConnected);
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_DISCONNECTED, onDisconnected);
@@ -271,9 +255,6 @@ int main()
     
     uart = new MicroBitUARTService(*uBit.ble,32,32);
     uBit.display.scroll("R4G");
-    
-    //gives Bluetooth access to the micro:bit LED matrix
-    //new MicroBitLEDService(*uBit.ble, uBit.display);
 
     // If main exits, there may still be other fibers running or registered event handlers etc.
     // Simply release this fiber, which will mean we enter the scheduler. Worse case, we then
@@ -284,7 +265,7 @@ int main()
 /***** Motor control: choose your board or write your own motor control *****/
 
 // ElecFreaks Motor:bit Board
-/*
+
 void moveBot(ManagedString msg) {
     // Motor 1 PWM = P1,    Motor1 direction = P8 (LOW = CC, HIGH = C)
     // Motor 2 PWM = P2,    Motor2 direction = P12(LOW = CC, HIGH = C)
@@ -301,7 +282,7 @@ void moveBot(ManagedString msg) {
     uBit.io.P1.setAnalogValue((m1_pwm & moveMask)* velocity_1);             //pwm motor1
     uBit.io.P2.setAnalogValue(((m2_pwm & moveMask)/m2_pwm) * velocity_2);   //pwm motor2
 }
-*/
+
 
 
 // Keyestudio Motor Driver Board v1.8
@@ -327,9 +308,8 @@ void moveBot(ManagedString msg) {
 }
 */
 
-
 //Waveshare Motor Driver for micro:bit
- 
+ /*
 void moveBot(ManagedString msg) {
     // Motor A in1 = pin 13,    Motor A in2 = pin 12
     // Motor B in1 = pin 14,    Motor B in2 = pin 15
@@ -351,5 +331,4 @@ void moveBot(ManagedString msg) {
     P8.setAnalogValue(((m1_pwm & moveMask)/m1_pwm) * velocity_1);   //pwm motor1
     P16.setAnalogValue(((m2_pwm & moveMask)/m2_pwm) * velocity_2);  //pwm motor2
 }
-
-
+*/
