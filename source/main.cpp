@@ -39,8 +39,8 @@ MicroBitPin MelodyPin(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG)
 //MicroBitPin SensorPinR(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ALL);
 
 // uncomment if you use a Waveshare Motor Driver Board: pre configure pwm pins 8 and 16 as analog outputs:
-//MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
-//MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
+MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
+MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
 
 /*  Pictures  */
 
@@ -203,7 +203,32 @@ void onConnected(MicroBitEvent) {
                     }
                 }
                 break;
-            }  
+            }
+            // Rotate Display by 0, 90 or 180 degrees
+            case 'T': {
+                int degrees = msg.charAt(1);
+                if(degrees == '0') {
+                    uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_0);
+                    break;
+                }
+                else if(degrees == '9' && msg.charAt(2) == '0') {
+                    uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_90);
+                    break;
+                }
+                else if(degrees == '1' && msg.charAt(2) == '8') {
+                    uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_180);
+                    break;
+                }
+                else if(degrees == '2' && msg.charAt(2) == '7') {
+                    uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_270);
+                    break;
+                }
+                else {
+                    uBit.display.scroll(msg);
+                    break;
+                }
+                break;
+            }
             // LED Anzeige (show LED picture)
             case 'A': {
                 int idx = msg.charAt(1) - '0';
@@ -265,7 +290,7 @@ int main()
 /***** Motor control: choose your board or write your own motor control *****/
 
 // ElecFreaks Motor:bit Board
-
+/*
 void moveBot(ManagedString msg) {
     // Motor 1 PWM = P1,    Motor1 direction = P8 (LOW = CC, HIGH = C)
     // Motor 2 PWM = P2,    Motor2 direction = P12(LOW = CC, HIGH = C)
@@ -282,7 +307,7 @@ void moveBot(ManagedString msg) {
     uBit.io.P1.setAnalogValue((m1_pwm & moveMask)* velocity_1);             //pwm motor1
     uBit.io.P2.setAnalogValue(((m2_pwm & moveMask)/m2_pwm) * velocity_2);   //pwm motor2
 }
-
+*/
 
 
 // Keyestudio Motor Driver Board v1.8
@@ -309,7 +334,7 @@ void moveBot(ManagedString msg) {
 */
 
 //Waveshare Motor Driver for micro:bit
- /*
+
 void moveBot(ManagedString msg) {
     // Motor A in1 = pin 13,    Motor A in2 = pin 12
     // Motor B in1 = pin 14,    Motor B in2 = pin 15
@@ -331,4 +356,4 @@ void moveBot(ManagedString msg) {
     P8.setAnalogValue(((m1_pwm & moveMask)/m1_pwm) * velocity_1);   //pwm motor1
     P16.setAnalogValue(((m2_pwm & moveMask)/m2_pwm) * velocity_2);  //pwm motor2
 }
-*/
+
