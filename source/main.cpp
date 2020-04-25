@@ -229,6 +229,18 @@ void onConnected(MicroBitEvent) {
                 }
                 break;
             }
+            // Wait
+            case 'W': {
+                int wait_time = (msg.charAt(1)-'0') * 1000; // time in milliseconds
+                if (wait_time >= 1000 && wait_time <= 9000) {
+                    uBit.sleep(wait_time);
+                }
+                else {
+                    uBit.display.scroll(msg);
+                }
+                break;
+            }
+                
             // LED Anzeige (show LED picture)
             case 'A': {
                 int idx = msg.charAt(1) - '0';
@@ -263,7 +275,7 @@ int main()
 {
     // Initialise the micro:bit runtime.
     uBit.init();
-    //uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_180);
+    uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_0);
     
     //serial communication via uart
     uBit.serial.baud(9600);
