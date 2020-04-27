@@ -178,11 +178,11 @@ void onConnected(MicroBitEvent) {
                 char motor = msg.charAt(1);
                 uint32_t val = (uint32_t)((msg.charAt(2)-'0') * 10 + (msg.charAt(3)-'0'));
                 // check if input is valid
-                if(val < 1 || val > 16){
+                if(val < 1 || val > 31){
                     uBit.display.scroll(msg);
                     break;
                 }
-                int vel = int((val * 64)-1);    // scale to velocity
+                int vel = int(val * 32 + 31);
                 switch(motor){
                     case '1': {
                         velocity_1 = vel;
@@ -204,7 +204,7 @@ void onConnected(MicroBitEvent) {
                 }
                 break;
             }
-            // Rotate Display by 0, 90 or 180 degrees
+            // Rotate Display
             case 'T': {
                 int degrees = msg.charAt(1);
                 if(degrees == '0') {
@@ -240,7 +240,6 @@ void onConnected(MicroBitEvent) {
                 }
                 break;
             }
-                
             // LED Anzeige (show LED picture)
             case 'A': {
                 int idx = msg.charAt(1) - '0';
