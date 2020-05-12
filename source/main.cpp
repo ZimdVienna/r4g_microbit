@@ -231,8 +231,9 @@ void onConnected(MicroBitEvent) {
             }
             // Wait
             case 'W': {
-                int wait_time = (msg.charAt(1)-'0') * 1000; // time in milliseconds
-                if (wait_time >= 1000 && wait_time <= 9000) {
+                int wait_time = (uint32_t)((msg.charAt(1)-'0') * 1000);
+                wait_time = wait_time + (uint32_t)((msg.charAt(3)-'0') * 100);
+                if (wait_time >= 100 && wait_time <= 9900) {
                     uBit.sleep(wait_time);
                 }
                 else {
