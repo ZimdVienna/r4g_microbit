@@ -42,6 +42,12 @@ MicroBitPin MelodyPin(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG)
 MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
 MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
 
+// uncomment if you use Elecfreaks Motor Driver Board: pre configure pwm pins 8 and 16 as analog outputs:
+/*
+MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
+MicroBitPin P2(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
+*/
+
 /*  Pictures  */
 
 // Microbit images get normally stored in sram, to store them in flash:
@@ -138,7 +144,7 @@ void onDisconnected(MicroBitEvent) {
     uBit.display.scroll("D");
 }
 
-/* robot control when connected */
+/* robot control when connected to backend */
 void onConnected(MicroBitEvent) {
     //>! receives and handles commands, sends "OK" to app if successfull
     ManagedString msg = "R4G";
@@ -320,6 +326,7 @@ void moveBot(ManagedString msg) {
     uBit.io.P2.setAnalogValue(((m2_pwm & moveMask)/m2_pwm) * velocity_2);   //pwm motor2
 }
 */
+
 
 
 // Keyestudio Motor Driver Board v1.8
