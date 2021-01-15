@@ -41,6 +41,15 @@ MicroBitPin MelodyPin(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG)
 //MicroBitPin SensorPinL(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ALL);
 //MicroBitPin SensorPinR(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ALL);
 
+// comment out if you are not using waveshare motor board
+MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
+MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
+/*
+// comment in if you are using keyestudio- or elecfreak motor board
+MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
+MicroBitPin P2(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
+*/
+
 /**
  PICTURES
  To load an image from flash and display it:
@@ -112,7 +121,7 @@ void onConnected(MicroBitEvent) {
                 break;}
         }
         MelodyPin.setAnalogValue(0);
-        moveBot("s");       // stop motor
+        setMotorPins("s");       // stop motor
         uart->send("OK\n"); // send confirmation to app
     }
 }
@@ -124,7 +133,7 @@ void onDisconnected(MicroBitEvent) {
 
 void onButtonB(MicroBitEvent) {
     //<! stops motors when ButtonB is clicked long
-    moveBot("s");
+    setMotorPins("s");
     uBit.display.scroll("stop");
 }
 
@@ -233,9 +242,9 @@ void moveBot(ManagedString msg) {
     }
     duration = (uint32_t)((msg.charAt(2)-'0') * 1000);
     duration = duration + (uint32_t)((msg.charAt(4)-'0') * 100);
-    moveBot(msg);
+    setMotorPins(msg);
     uBit.sleep(duration);
-    moveBot("s");
+    setMotorPins("s");
 }
 
 void changeMotorVelocity(ManagedString msg) {
@@ -317,10 +326,6 @@ void setMotorPins(ManagedString msg) {
 
 // ElecFreaks Motor:bit Board
 /*
- // put the next two lines to the top to pre configure pwm pins 1 and 2 as analog outputs for ElecFreaks Driver
- MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
- MicroBitPin P2(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
-
 void setMotorPins(ManagedString msg) {
     // Motor 1 PWM = P1,    Motor1 direction = P8 (LOW = CC, HIGH = C)
     // Motor 2 PWM = P2,    Motor2 direction = P12(LOW = CC, HIGH = C)
@@ -341,10 +346,6 @@ void setMotorPins(ManagedString msg) {
 
 // Keyestudio Motor Driver Board v1.8
 /*
- // Put the next two lines to the top to pre configure pwm pins 8 and 16 as analog outputs for Keyestudio Driver
- MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
- MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
-
 void setMotorPins(ManagedString msg) {
     // Enable = pin14
     // Motor1 CW = pin12,   Motor1 CCW = pin13
