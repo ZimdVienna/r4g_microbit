@@ -23,12 +23,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-/**
- * Microbit program for the project Robo4girls (R4G)
- * Educational micro:bit - robot plattform
- * Project repository: https://github.com/ZimdVienna/Robo4girls
- * Daniela Riedl, 2018
- */
+/*
+ ABOUT
+ Microbit program for the project Robo4girls (R4G)
+ Educational micro:bit - robot plattform
+ Project repository: https://github.com/ZimdVienna/Robo4girls
+ Daniela Riedl, 2018
+*/
 
 #include "MicroBit.h"
 #include "MicroBitUARTService.h"
@@ -44,19 +45,18 @@ MicroBitPin MelodyPin(MICROBIT_ID_IO_P0, MICROBIT_PIN_P0, PIN_CAPABILITY_ANALOG)
 // comment out if you are not using waveshare motor board
 MicroBitPin P8(MICROBIT_ID_IO_P8, MICROBIT_PIN_P8, PIN_CAPABILITY_ANALOG);
 MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
-/*
-// comment in if you are using keyestudio- or elecfreak motor board
-MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
-MicroBitPin P2(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
-*/
 
-/**
+//// comment in if you are using keyestudio- or elecfreak motor board
+//MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
+//MicroBitPin P2(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
+
+/*
  PICTURES
  To load an image from flash and display it:
- MicroBitImage i((ImageData*)heart);
- uBit.display.print(MicroBitImage, int x, int y, int alpha , int delay);
+    MicroBitImage i((ImageData*)heart);
+    uBit.display.print(MicroBitImage, int x, int y, int alpha , int delay);
  Images are stored to flash instead of sram (Microbit images) as follows
- */
+*/
 const uint8_t smallHeart[] __attribute__ ((aligned (4)))= { 0xff, 0xff, 5, 0, 5, 0, 0,0,0,0,0, 0,1,0,1,0, 0,1,1,1,0, 0,0,1,0,0, 0,0,0,0,0 };
 const uint8_t heart[] __attribute__ ((aligned (4)))     = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 1,1,1,1,1, 1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0 };
 const uint8_t happy[] __attribute__((aligned (4)))      = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 0,1,0,1,0, 0,0,0,0,0, 1,0,0,0,1, 0,1,1,1,0 };
@@ -121,7 +121,7 @@ void onConnected(MicroBitEvent) {
                 break;}
         }
         MelodyPin.setAnalogValue(0);
-        setMotorPins("s");       // stop motor
+        setMotorPins("s");  // stop motor
         uart->send("OK\n"); // send confirmation to app
     }
 }
@@ -144,29 +144,31 @@ int main()
     uBit.init();
     uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_0);
     
-    //serial communication via uart
+    // Serial communication via uart
     uBit.serial.baud(9600);
     uBit.serial.send("A\r\n");
-
-    //sensorRight.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH));
-    //sensorLeft.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH));
-    //uBit.messageBus.listen(MICROBIT_ID_IO_P1, MICROBIT_PIN_EVT_FALL, onTouch);
-    //uBit.messageBus.listen(MICROBIT_ID_IO_P2, MICROBIT_PIN_EVT_FALL, onTouch)
-
+    
+    // Define callback functions for events
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_CONNECTED, onConnected);
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_DISCONNECTED, onDisconnected);
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_LONG_CLICK, onButtonB);
     
+//    // Sensors
+//    sensorRight.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH));
+//    sensorLeft.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH));
+//    uBit.messageBus.listen(MICROBIT_ID_IO_P1, MICROBIT_PIN_EVT_FALL, onTouch);
+//    uBit.messageBus.listen(MICROBIT_ID_IO_P2, MICROBIT_PIN_EVT_FALL, onTouch)
+    
     uart = new MicroBitUARTService(*uBit.ble,32,32);
     uBit.display.scroll("R4G");
-
+    
     // If main exits, there may still be other fibers running or registered event handlers etc.
     // Simply release this fiber, which will mean we enter the scheduler. Worse case, we then
     // sit in the idle task forever, in a power efficient sleep.
     release_fiber();
 }
 
-/// FUNCTIONS
+// FUNCTIONS
 void wait(ManagedString msg) {
     int wait_time = (uint32_t)((msg.charAt(1)-'0') * 1000);
     wait_time = wait_time + (uint32_t)((msg.charAt(3)-'0') * 100);
@@ -178,17 +180,15 @@ void wait(ManagedString msg) {
     }
 }
 
-/* MELODY */
 void playMelody(ManagedString msg) {
-    //check if input is valid melody input:
+    //>! play Song from songbook in musicalNotes.h
     if((msg.charAt(1)-'0') < 1 || (msg.charAt(1)-'0') > storedSongs){
         uBit.display.scroll(msg);
         return;
     }
-    int songidx = (int)(msg.charAt(1)-'0') - 1; // index in SONGS array
-    /// play Song from songbook in musicalNotes.h
+    int songidx = (int)(msg.charAt(1)-'0') - 1;
     for(int i = 0; SONGS[songidx][i] != -1; i++){
-        MelodyPin.setAnalogValue(511);//set duty cycle
+        MelodyPin.setAnalogValue(511);  // set duty cycle
         MelodyPin.setAnalogPeriodUs((int)(1000000/SONGS[songidx][i]));
         uBit.sleep(BEATS[songidx][i]);
         MelodyPin.setAnalogValue(0);
@@ -196,7 +196,6 @@ void playMelody(ManagedString msg) {
     }
 }
 
-/* DISPLAY */
 void turnDisplay(ManagedString msg) {
     int degrees = msg.charAt(1);
     if(degrees == '0') {
@@ -217,7 +216,7 @@ void turnDisplay(ManagedString msg) {
 }
 
 void showPictureOrText(ManagedString msg) {
-    /* Show picture or scroll text according to msg from app */
+    //>! Show picture or scroll text according to msg from app
     int idx = msg.charAt(1) - '0';
     if(idx > storedPictures){
         uBit.display.scroll(msg);
@@ -233,7 +232,6 @@ void showPictureOrText(ManagedString msg) {
     uBit.display.clear();
 }
 
-/* MOTOR CONTROL */
 void moveBot(ManagedString msg) {
     uint32_t duration = 0;
     if((msg.charAt(2)-'0') < 0 || (msg.charAt(2)-'0') > 10){
@@ -250,7 +248,6 @@ void moveBot(ManagedString msg) {
 void changeMotorVelocity(ManagedString msg) {
     char motor = msg.charAt(1);
     uint32_t val = (uint32_t)((msg.charAt(2)-'0') * 10 + (msg.charAt(3)-'0'));
-    // check if input is valid
     if(val < 1 || val > 31){
         uBit.display.scroll(msg);
         return;
@@ -300,7 +297,7 @@ unsigned char set_direction(ManagedString direction, unsigned char *bitmasks){
     return moveMask;
 }
 
-/* choose your board or write your own motor control */
+// Choose your board or write your own motor control
 void setMotorPins(ManagedString msg) {
     /**
      * Waveshare Motor Driver Board for micro:bit
