@@ -88,7 +88,6 @@ void onConnected(MicroBitEvent) {
     ManagedString eom(":"); // Message delimiter
     while(1) {
         msg = uart->readUntil(eom);
-        uint32_t duration = 0;
         switch(msg.charAt(0)) {
             case 'B': {
                 moveBot(msg);
@@ -175,7 +174,7 @@ void playMelody(ManagedString msg) {
     //check if input is valid melody input:
     if((msg.charAt(1)-'0') < 1 || (msg.charAt(1)-'0') > storedSongs){
         uBit.display.scroll(msg);
-        break;
+        return;
     }
     int songidx = (int)(msg.charAt(1)-'0') - 1; // index in SONGS array
     /// play Song from songbook in musicalNotes.h
@@ -193,23 +192,18 @@ void turnDisplay(ManagedString msg) {
     int degrees = msg.charAt(1);
     if(degrees == '0') {
         uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_0);
-        break;
     }
     else if(degrees == '9' && msg.charAt(2) == '0') {
         uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_90);
-        break;
     }
     else if(degrees == '1' && msg.charAt(2) == '8') {
         uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_180);
-        break;
     }
     else if(degrees == '2' && msg.charAt(2) == '7') {
         uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_270);
-        break;
     }
     else {
         uBit.display.scroll(msg);
-        break;
     }
 }
 
@@ -218,12 +212,12 @@ void showPictureOrText(ManagedString msg) {
     int idx = msg.charAt(1) - '0';
     if(idx > storedPictures){
         uBit.display.scroll(msg);
-        break;
+        return;
     }
     int time_to_shine = (msg.charAt(2) - '0') * 1000;
     if(time_to_shine < 0 || time_to_shine > 9000){
         uBit.display.scroll(msg);
-        break;
+        return;
     }
     MicroBitImage i((ImageData*)PICTURES[idx-1]);
     uBit.display.print(i,0,0,0,time_to_shine);
@@ -232,9 +226,10 @@ void showPictureOrText(ManagedString msg) {
 
 /* MOTOR CONTROL */
 void moveBot(ManagedString msg) {
+    uint32_t duration = 0;
     if((msg.charAt(2)-'0') < 0 || (msg.charAt(2)-'0') > 10){
         uBit.display.scroll(msg);
-        break;
+        return;
     }
     duration = (uint32_t)((msg.charAt(2)-'0') * 1000);
     duration = duration + (uint32_t)((msg.charAt(4)-'0') * 100);
@@ -249,7 +244,7 @@ void changeMotorVelocity(ManagedString msg) {
     // check if input is valid
     if(val < 1 || val > 31){
         uBit.display.scroll(msg);
-        break;
+        return;
     }
     int vel = int(val * 32 + 31);
     switch(motor){
@@ -274,7 +269,10 @@ void changeMotorVelocity(ManagedString msg) {
 }
 
 unsigned char set_direction(ManagedString direction, unsigned char *bitmasks){
-    /* Set given direction via bitmasks for different motor control boards */
+    /**
+     * Set a bitmask for given direction
+     * Returns bitmask for direction
+     */
     unsigned char moveMask = 0;
     if(direction == forwards)
         moveMask = bitmasks[0];
