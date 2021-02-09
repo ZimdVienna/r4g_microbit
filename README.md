@@ -3,7 +3,13 @@ This is the Mbed project for the R4G Micro:bit program. It is programmed in C/C+
 
 
 ### To change and build the micro:bit .hex file follow theese steps:
-## Install yotta
+You can use either an online or offline toolchain. For changing the code offline yotta is used. It seems there are some issues lately with the yotta dependencies, so I recommend trying to compile the code online with the MBed compiler.
+## Online: Mbed compiler
+Create an account on [Mbed](https://os.mbed.com/) and verify your email address. Log in at MBed and open your MBed compiler. You have to add the microbit platform to your devices first. On the right upper corner of the compiler, click on "No device selected". In the window that pops up "Select a Platform", click on + Add board. Add the BBC micro:bit from the Development boards. To that end, click on the micro:bit, -in the [micro:bit window](os.mbed.com/platforms/Microbit/) that opens you get additional information on how to program the micro:bit with Mbed. Scroll down a bit and click on + Add to your Mbed Compiler. Change back to your compiler tab and open the Select a Platform window again. Select the BBC micro:bit. You should see the microbit icon in your compiler now.
+
+To import the r4g program click on import a program and import from URL. In the Source URL enter the link to this repository, select import as program and click import.
+
+## Offline: Install yotta
 Follow the installation instructions from [IOT Programmer](https://www.iot-programmer.com/index.php/books/27-micro-bit-iot-in-c/chapters-micro-bit-iot-in-c/44-offline-c-c-development-with-the-micro-bit) or from [lancaster-university](https://lancaster-university.github.io/microbit-docs/offline-toolchains/).
 Theese links are also very helpfull for learning about the microbit and how to program it in C/C++.
 ### clone the repository
