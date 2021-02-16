@@ -89,6 +89,7 @@ void turnDisplay(ManagedString msg);
 void wait(ManagedString msg);
 void showPictureOrText(ManagedString msg);
 void moveBot(ManagedString msg);
+void showSensorValue(ManagedString msg);
 
 // CALLBACK FUNCTIONS
 void onConnected(MicroBitEvent) {
@@ -106,6 +107,9 @@ void onConnected(MicroBitEvent) {
                 break;}
             case 'G': {
                 changeMotorVelocity(msg);
+                break;}
+            case 'S': {
+                showSensorValue(msg);
                 break;}
             case 'T': {
                 turnDisplay(msg);
@@ -169,6 +173,18 @@ int main()
 }
 
 // FUNCTIONS
+void showSensorValue(ManagedString msg) {
+    switch (msg.charAt(1)) {
+        case 't': {
+            // uBit.thermometer.setCalibration(uBit.thermometer.getOffset());
+            uBit.display.scroll(uBit.thermometer.getTemperature());
+            break;}
+        default:{
+            uBit.display.scroll(msg);
+            break;}
+    }
+}
+
 void wait(ManagedString msg) {
     int wait_time = (uint32_t)((msg.charAt(1)-'0') * 1000);
     wait_time = wait_time + (uint32_t)((msg.charAt(3)-'0') * 100);
@@ -221,6 +237,9 @@ void showPictureOrText(ManagedString msg) {
     if(idx > storedPictures){
         uBit.display.scroll(msg);
         return;
+    } else if(idx == 0) {
+        uBit.display.clear();
+        return;
     }
     int time_to_shine = (msg.charAt(2) - '0') * 1000;
     if(time_to_shine < 0 || time_to_shine > 9000){
@@ -228,8 +247,12 @@ void showPictureOrText(ManagedString msg) {
         return;
     }
     MicroBitImage i((ImageData*)PICTURES[idx-1]);
-    uBit.display.print(i,0,0,0,time_to_shine);
-    uBit.display.clear();
+    if(time_to_shine == 0) {
+        uBit.display.printAsync(i);
+    } else {
+        uBit.display.print(i,0,0,0,time_to_shine);
+        uBit.display.clear();
+    }
 }
 
 void moveBot(ManagedString msg) {
