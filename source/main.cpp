@@ -90,9 +90,6 @@ void onConnected(MicroBitEvent) {
             case 'G': {
                 changeMotorVelocity(msg);
                 break;}
-            case 'S': {
-                showSensorValue(msg);
-                break;}
             case 'T': {
                 turnDisplay(msg);
                 break;}
@@ -154,19 +151,6 @@ int main()
     // Simply release this fiber, which will mean we enter the scheduler. Worse case, we then
     // sit in the idle task forever, in a power efficient sleep.
     release_fiber();
-}
-
-// FUNCTIONS
-void showSensorValue(ManagedString msg) {
-    switch (msg.charAt(1)) {
-        case 't': {
-            // uBit.thermometer.setCalibration(uBit.thermometer.getOffset());
-            uBit.display.scroll(uBit.thermometer.getTemperature());
-            break;}
-        default:{
-            uBit.display.scroll(msg);
-            break;}
-    }
 }
 
 void wait(ManagedString msg) {
