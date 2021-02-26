@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include "MicroBit.h"
 #include "MicroBitUARTService.h"
 #include "MusicalNotes.h"       //musical notes and songbook
+#include "Pictures.h"
 
 // MICROBIT OBJECTS
 MicroBit uBit;                  // instance of the microbit class
@@ -49,25 +50,6 @@ MicroBitPin P16(MICROBIT_ID_IO_P16, MICROBIT_PIN_P16, PIN_CAPABILITY_ANALOG);
 //// comment in if you are using keyestudio- or elecfreak motor board
 //MicroBitPin P1(MICROBIT_ID_IO_P1, MICROBIT_PIN_P1, PIN_CAPABILITY_ANALOG);
 //MicroBitPin P2(MICROBIT_ID_IO_P2, MICROBIT_PIN_P2, PIN_CAPABILITY_ANALOG);
-
-/*
- PICTURES
- To load an image from flash and display it:
-    MicroBitImage i((ImageData*)heart);
-    uBit.display.print(MicroBitImage, int x, int y, int alpha , int delay);
- Images are stored to flash instead of sram (Microbit images) as follows
-*/
-const uint8_t smallHeart[] __attribute__ ((aligned (4)))= { 0xff, 0xff, 5, 0, 5, 0, 0,0,0,0,0, 0,1,0,1,0, 0,1,1,1,0, 0,0,1,0,0, 0,0,0,0,0 };
-const uint8_t heart[] __attribute__ ((aligned (4)))     = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 1,1,1,1,1, 1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0 };
-const uint8_t happy[] __attribute__((aligned (4)))      = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 0,1,0,1,0, 0,0,0,0,0, 1,0,0,0,1, 0,1,1,1,0 };
-const uint8_t sad[] __attribute__((aligned (4)))        = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 0,1,0,1,0, 0,0,0,0,0, 0,1,1,1,0, 1,0,0,0,1 };
-const uint8_t angry[] __attribute__((aligned (4)))      = { 0xff, 0xff, 5, 0, 5, 0, 1,0,0,0,1, 0,1,0,1,0, 0,0,0,0,0, 1,1,1,1,1, 1,0,0,0,1 };
-const uint8_t asleep[] __attribute__((aligned(4)))      = { 0xff, 0xff, 5, 0, 5, 0, 0,0,0,0,0, 1,1,0,1,1, 0,0,0,0,0, 0,1,1,1,0, 0,0,0,0,0 };
-const uint8_t surprised[] __attribute__((aligned(4)))   = { 0xff, 0xff, 5, 0, 5, 0, 0,1,0,1,0, 0,0,0,0,0, 0,0,1,0,0, 0,1,0,1,0, 0,0,1,0,0 };
-const uint8_t yes[] __attribute__((aligned(4)))         = { 0xff, 0xff, 5, 0, 5, 0, 0,0,0,0,0, 0,0,0,0,1, 0,0,0,1,0, 1,0,1,0,0, 0,1,0,0,0 };
-const uint8_t no[] __attribute__((aligned(4)))          = { 0xff, 0xff, 5, 0, 5, 0, 1,0,0,0,1, 0,1,0,1,0, 0,0,1,0,0, 0,1,0,1,0, 1,0,0,0,1 };
-const uint8_t *PICTURES[] = {happy, heart, smallHeart, sad, angry, asleep, surprised, yes, no};
-const int storedPictures = 9;
 
 //  MOTOR CONTROL VARIABLES
 uint32_t velocity_1 = 1023;  // initial velocity motor1 (motor velocity from (1*64 - 1) = 63 to (16*64 - 1) = 1023
@@ -124,8 +106,8 @@ void onConnected(MicroBitEvent) {
                 uBit.display.scroll(msg);
                 break;}
         }
-        MelodyPin.setAnalogValue(0);
-        setMotorPins("s");  // stop motor
+        // MelodyPin.setAnalogValue(0);
+        // setMotorPins("s");  // stop motor
         uart->send("OK\n"); // send confirmation to app
     }
 }
@@ -146,6 +128,7 @@ int main()
 {
     // Initialise the micro:bit runtime.
     uBit.init();
+    uBit.display.scrollAsync("R4G");
     uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_0);
     
     // Serial communication via uart
@@ -164,7 +147,8 @@ int main()
 //    uBit.messageBus.listen(MICROBIT_ID_IO_P2, MICROBIT_PIN_EVT_FALL, onTouch)
     
     uart = new MicroBitUARTService(*uBit.ble,32,32);
-    uBit.display.scroll("R4G");
+    uBit.thermometer.setPeriod(2000);
+    new MicroBitTemperatureService(*uBit.ble, uBit.thermometer);
     
     // If main exits, there may still be other fibers running or registered event handlers etc.
     // Simply release this fiber, which will mean we enter the scheduler. Worse case, we then
