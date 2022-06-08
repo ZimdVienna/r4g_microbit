@@ -64,14 +64,15 @@ const ManagedString stop("s");
 
 // FUNCTION DECLARATIONS
 unsigned char set_direction(ManagedString direction, unsigned char *bitmasks);  // Set given direction via bitmask
+void showPictureOrText(ManagedString msg);
 void setMotorPins(ManagedString msg);    // Set pins of motor board, choose your board on the bottom of the file
 void changeMotorVelocity(ManagedString msg);
 void playMelody(ManagedString msg);
 void turnDisplay(ManagedString msg);
 void wait(ManagedString msg);
-void showPictureOrText(ManagedString msg);
+
 void moveBot(ManagedString msg);
-void showSensorValue(ManagedString msg);
+//void showSensorValue(ManagedString msg);
 
 // CALLBACK FUNCTIONS
 void onConnected(MicroBitEvent) {
@@ -81,23 +82,28 @@ void onConnected(MicroBitEvent) {
     while(1) {
         msg = uart->readUntil(eom);
         switch(msg.charAt(0)) {
+            case 'A': {
+                showPictureOrText(msg);
+                break;}
             case 'B': {
                 moveBot(msg);
-                break;}
-            case 'M': {
-                playMelody(msg);
                 break;}
             case 'G': {
                 changeMotorVelocity(msg);
                 break;}
+            case 'M': {
+                playMelody(msg);
+                break;}
+                /*
+            case 'S': {
+                showSensorValue(msg);
+                break;}
+                */
             case 'T': {
                 turnDisplay(msg);
                 break;}
             case 'W': {
                 wait(msg);
-                break;}
-            case 'A': {
-                showPictureOrText(msg);
                 break;}
             default: {
                 uBit.display.scroll(msg);
@@ -117,7 +123,8 @@ void onDisconnected(MicroBitEvent) {
 void onButtonB(MicroBitEvent) {
     //<! stops motors when ButtonB is clicked long
     setMotorPins("s");
-    uBit.display.scroll("stop");
+    uBit.display.clear();
+    uart->send("STOP");
 }
 
 // MAIN
@@ -137,15 +144,9 @@ int main()
     uBit.messageBus.listen(MICROBIT_ID_BLE, MICROBIT_BLE_EVT_DISCONNECTED, onDisconnected);
     uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_LONG_CLICK, onButtonB);
     
-//    // Sensors
-//    sensorRight.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH));
-//    sensorLeft.eventOn(MICROBIT_PIN_EVENT_ON_TOUCH));
-//    uBit.messageBus.listen(MICROBIT_ID_IO_P1, MICROBIT_PIN_EVT_FALL, onTouch);
-//    uBit.messageBus.listen(MICROBIT_ID_IO_P2, MICROBIT_PIN_EVT_FALL, onTouch)
-    
     uart = new MicroBitUARTService(*uBit.ble,32,32);
-    uBit.thermometer.setPeriod(2000);
-    new MicroBitTemperatureService(*uBit.ble, uBit.thermometer);
+    //uBit.thermometer.setPeriod(2000);
+    //new MicroBitTemperatureService(*uBit.ble, uBit.thermometer);
     
     // If main exits, there may still be other fibers running or registered event handlers etc.
     // Simply release this fiber, which will mean we enter the scheduler. Worse case, we then
@@ -153,51 +154,20 @@ int main()
     release_fiber();
 }
 
-void wait(ManagedString msg) {
-    int wait_time = (uint32_t)((msg.charAt(1)-'0') * 1000);
-    wait_time = wait_time + (uint32_t)((msg.charAt(3)-'0') * 100);
-    if (wait_time >= 100 && wait_time <= 9900) {
-        uBit.sleep(wait_time);
-    }
-    else {
-        uBit.display.scroll(msg);
-    }
-}
-
-void playMelody(ManagedString msg) {
-    //>! play Song from songbook in musicalNotes.h
-    if((msg.charAt(1)-'0') < 1 || (msg.charAt(1)-'0') > storedSongs){
-        uBit.display.scroll(msg);
-        return;
-    }
-    int songidx = (int)(msg.charAt(1)-'0') - 1;
-    for(int i = 0; SONGS[songidx][i] != -1; i++){
-        MelodyPin.setAnalogValue(511);  // set duty cycle
-        MelodyPin.setAnalogPeriodUs((int)(1000000/SONGS[songidx][i]));
-        uBit.sleep(BEATS[songidx][i]);
-        MelodyPin.setAnalogValue(0);
-        uBit.sleep(50);
+// FUNCTIONS
+/* 
+void showSensorValue(ManagedString msg) {
+    switch (msg.charAt(1)) {
+        case 't': {
+            // uBit.thermometer.setCalibration(uBit.thermometer.getOffset());
+            uBit.display.scroll(uBit.thermometer.getTemperature());
+            break;}
+        default:{
+            uBit.display.scroll(msg);
+            break;}
     }
 }
-
-void turnDisplay(ManagedString msg) {
-    int degrees = msg.charAt(1);
-    if(degrees == '0') {
-        uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_0);
-    }
-    else if(degrees == '9' && msg.charAt(2) == '0') {
-        uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_90);
-    }
-    else if(degrees == '1' && msg.charAt(2) == '8') {
-        uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_180);
-    }
-    else if(degrees == '2' && msg.charAt(2) == '7') {
-        uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_270);
-    }
-    else {
-        uBit.display.scroll(msg);
-    }
-}
+*/
 
 void showPictureOrText(ManagedString msg) {
     //>! Show picture or scroll text according to msg from app
@@ -217,10 +187,12 @@ void showPictureOrText(ManagedString msg) {
     MicroBitImage i((ImageData*)PICTURES[idx-1]);
     if(time_to_shine == 0) {
         uBit.display.printAsync(i);
+        //uart->send("OK\n"); // quickfix - did not return to switch case
     } else {
         uBit.display.print(i,0,0,0,time_to_shine);
         uBit.display.clear();
     }
+    return;
 }
 
 void moveBot(ManagedString msg) {
@@ -234,6 +206,7 @@ void moveBot(ManagedString msg) {
     setMotorPins(msg);
     uBit.sleep(duration);
     setMotorPins("s");
+    return;
 }
 
 void changeMotorVelocity(ManagedString msg) {
@@ -263,6 +236,57 @@ void changeMotorVelocity(ManagedString msg) {
             break;
         }
     }
+    return;
+}
+
+void playMelody(ManagedString msg) {
+    //>! play Song from songbook in musicalNotes.h
+    int songidx = msg.charAt(1) - '0';
+    //int songidx = (int)((msg.charAt(1)-'0') * 10 + (msg.charAt(2)-'0') -1);
+    if(songidx < 0 || songidx > storedSongs){
+        uBit.display.scroll(msg);
+        return;
+    }
+    for(int i = 0; SONGS[songidx-1][i] != -1; i++){
+        MelodyPin.setAnalogValue(511);  // set duty cycle
+        MelodyPin.setAnalogPeriodUs((int)(1000000/SONGS[songidx-1][i]));
+        uBit.sleep(BEATS[songidx-1][i]);
+        MelodyPin.setAnalogValue(0);
+        uBit.sleep(50);
+    }
+    return;
+}
+
+void turnDisplay(ManagedString msg) {
+    int degrees = msg.charAt(1);
+    if(degrees == '0') {
+        uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_0);
+    }
+    else if(degrees == '9' && msg.charAt(2) == '0') {
+        uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_90);
+    }
+    else if(degrees == '1' && msg.charAt(2) == '8') {
+        uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_180);
+    }
+    else if(degrees == '2' && msg.charAt(2) == '7') {
+        uBit.display.rotateTo(MICROBIT_DISPLAY_ROTATION_270);
+    }
+    else {
+        uBit.display.scroll(msg);
+    }
+    return;
+}
+
+void wait(ManagedString msg) {
+    int wait_time = (uint32_t)((msg.charAt(1)-'0') * 1000);
+    wait_time = wait_time + (uint32_t)((msg.charAt(3)-'0') * 100);
+    if ((wait_time >= 100) && (wait_time <= 9900)) {
+        uBit.sleep(wait_time);
+    }
+    else {
+        uBit.display.scroll(msg);
+    }
+    return;
 }
 
 unsigned char set_direction(ManagedString direction, unsigned char *bitmasks){
