@@ -1,4 +1,9 @@
 # R4G microbit
+## The Robo4girls App as well as this repository is no longer maintained. 
+## Use our Robo4earth App instead:
+## https://robo4earth.zimd.at/
+## Use our fork of the microbit-codal tools for Micro:bit V2 to update the Robo4earth HEX file:
+## https://github.com/ZimdVienna/microbit-v2-r4g
 This is the Mbed project for the R4G Micro:bit program. It is programmed in C/C++ and utilizes the [lancester-university microbit runtime](https://lancaster-university.github.io/microbit-docs/).
 
 
